@@ -1,18 +1,25 @@
 /* 
  * File:   main.c
  * Author: terryspitz
- */
+ * 
+ * LED strip demo for WS2812B ring, e.g. https://coolcomponents.co.uk/products/12-led-ring-sk6812-5050-rgb-led-with-integrated-drivers-adafruit-neopixel-compatible
+ * 
+ * MCC configured using https://blog.kubovy.eu/2019/02/17/ws281x-using-pic/ 
+ * 
+ * Connect WS2812B Data In on pin RC1 or reconfigure this in MCC Pin Manager: Grid View (in MPLAB X IDE)
+ * 
+ *  */
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include "mcc_generated_files/mcc.h"
 
-
 #define LED_COUNT 12
 uint8_t WS281x_led[LED_COUNT][3];
 
 inline void WS281x_show() {
+    //the magic happens here
     SPI1_WriteBlock(WS281x_led, LED_COUNT*3);
     __delay_us(50);
 }
@@ -23,6 +30,7 @@ inline void WS281x_all(uint8_t r, uint8_t g, uint8_t b) {
         WS281x_led[led][1] = r;
         WS281x_led[led][2] = b;
     }
+    WS281x_show();
 }
 
 inline void leds_off() {
@@ -34,8 +42,14 @@ void main(void) {
     SYSTEM_Initialize();
     SPI1_Open(SPI1_DEFAULT);
 
+    //startup sequence
 //    IO_RC0_SetHigh();
-    
+    WS281x_all(255, 0, 0);
+    __delay_ms(500);
+    WS281x_all(0, 255, 0);
+    __delay_ms(500);
+    WS281x_all(0, 0, 255);
+    __delay_ms(500);
             
     while(1) {
         //flash an LED
